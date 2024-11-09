@@ -20,5 +20,9 @@ namespace Gestion5Inventario
         {
             Console.WriteLine($"Producto: {Nombre}, Precio: {Precio:C}");
         }
+        public void EliminarProductos()
+        {
+            Console.WriteLine("Ingrese el nombre del producto que desea Eliminar");
+        }
     }
 }

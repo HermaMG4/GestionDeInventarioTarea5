@@ -14,17 +14,44 @@ namespace Gestion5Inventario
         {
             productos = new List<Producto>();
         }
+
         public void AgregarProducto(Producto producto)
         {
             productos.Add(producto);
-            Console.WriteLine($"Producto '{producto.Nombre}' agregado al inventario. ");
+            Console.WriteLine($"Producto '{producto.Nombre}' agregado al inventario.");
         }
-        public IEnumerable<Producto> FiltrarYOrdenarProductos(decimal precioMinimo)
+
+        // Función para actualizar el precio de un producto
+        public void ActualizarPrecio(string nombreProducto, decimal nuevoPrecio)
         {
-            return productos
-                .Where(Producto => Producto.Precio > precioMinimo)
-                .OrderBy(Productos => Productos);         
+            var producto = productos.FirstOrDefault(p => p.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase));
+            if (producto != null)
+            {
+                producto.Precio = nuevoPrecio;
+                Console.WriteLine($"El precio de '{nombreProducto}' ha sido actualizado a {nuevoPrecio:C}.");
+            }
+            else
+            {
+                Console.WriteLine($"Producto '{nombreProducto}' no encontrado.");
+            }
         }
+
+        // Función para eliminar un producto por nombre
+        public void EliminarProducto(string nombreProducto)
+        {
+            var productoAEliminar = productos.FirstOrDefault(p => p.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase));
+            if (productoAEliminar != null)
+            {
+                productos.Remove(productoAEliminar);
+                Console.WriteLine($"Producto '{nombreProducto}' ha sido eliminado del inventario.");
+            }
+            else
+            {
+                Console.WriteLine($"Producto '{nombreProducto}' no encontrado.");
+            }
+        }
+
+        // Función para contar y agrupar productos por precio
         public void ContarYAgruparProductos()
         {
             var resultado = productos
@@ -44,50 +71,45 @@ namespace Gestion5Inventario
                 Console.WriteLine($"Rango: {grupo.Rango}, Cantidad: {grupo.Cantidad}");
             }
         }
-        public void ActualizarPrecio(List<Producto> productos, string nombreProducto, decimal nuevoPrecio)
-        {
-            var producto = productos.FirstOrDefault((producto => producto.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase)));
-            if (producto != null)
-            {
-                producto.Precio = nuevoPrecio;
-                Console.WriteLine($"El precio de '{nuevoPrecio}' ha sido actualizado a {nuevoPrecio}.");
-            }
-            else
-            {
-                Console.WriteLine($"Precio '{nuevoPrecio}' no encontrado.");
-            }
-        }
-        public void EliminarProducto(List<Producto> productos, string nombreProducto)
-        {
-            var productoAEliminar = productos.FirstOrDefault(produc => produc.Nombre.Equals(nombreProducto, StringComparison.OrdinalIgnoreCase));
-            if (productoAEliminar != null)
-            {
-                productos.Remove(productoAEliminar);
-                Console.WriteLine($"Producto '{productoAEliminar}' ha sido eliminado del inventario.");
-            }
-            else
-            {
-                Console.WriteLine($"Producto '{productoAEliminar}' no encontrado. ");
-            }
-        }
-        public void GenerarReporteResumido()
-        {
-            if (!productos.Any())
-            {
-                Console.WriteLine("Inventario vacío: no hay productos disponibles.");
-                return;
-            }
 
-            int totalProductos = productos.Count;
-            decimal precioPromedio = productos.Select(p => p.Precio).Average();
-            var productoMasCaro = productos.MaxBy(p => p.Precio);
-            var productoMasBarato = productos.MinBy(p => p.Precio);
+        // Función para filtrar y ordenar productos por precio
+        public IEnumerable<Producto> FiltrarYOrdenarProductos(decimal precioMinimo)
+        {
+            return productos
+                .Where(p => p.Precio >= precioMinimo)
+                .OrderBy(p => p.Precio);
+        }
 
-            Console.WriteLine("=== Reporte Resumido del Inventario ===");
-            Console.WriteLine($"Total de productos en inventario: {totalProductos}");
-            Console.WriteLine($"Precio promedio de productos: {precioPromedio:C}");
-            Console.WriteLine($"Producto más caro: {productoMasCaro?.Nombre} - {productoMasCaro?.Precio:C}");
-            Console.WriteLine($"Producto más barato: {productoMasBarato?.Nombre} - {productoMasBarato?.Precio:C}");
+        // Validación para asegurarse de que el precio es válido
+        public decimal ObtenerPrecioValido()
+        {
+            decimal precio;
+            do
+            {
+                Console.Write("Precio: ");
+                if (!decimal.TryParse(Console.ReadLine(), out precio) || precio <= 0)
+                {
+                    Console.WriteLine("Por favor ingrese un precio válido (mayor que 0).");
+                }
+            } while (precio <= 0);
+
+            return precio;
+        }
+
+        // Validación para asegurarse de que el nombre del producto no está vacío
+        public string ObtenerNombreProductoValido()
+        {
+            string nombre;
+            do
+            {
+                Console.Write("Nombre: ");
+                nombre = Console.ReadLine();
+                if (string.IsNullOrEmpty(nombre))
+                {
+                    Console.WriteLine("El nombre del producto no puede estar vacío. Por favor ingrese un nombre válido.");
+                }
+            } while (string.IsNullOrEmpty(nombre));
+            return nombre;
         }
     }
 }
